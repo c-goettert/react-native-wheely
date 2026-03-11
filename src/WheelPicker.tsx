@@ -107,16 +107,11 @@ const WheelPicker: React.FC<Props> = ({
    * This ensures that what the user sees as selected in the picker always corresponds to the value state.
    */
   useEffect(() => {
-    const offset = selectedIndex * itemHeight;
-
-    // Also sync animated-state instantly
-    scrollY.setValue(offset);
-
-    flatListRef.current?.scrollToOffset({
-      offset,
+    flatListRef.current?.scrollToIndex({
+      index: selectedIndex,
       animated: false,
     });
-  }, [selectedIndex, itemHeight, scrollY]);
+  }, [selectedIndex]);
 
   return (
     <View
