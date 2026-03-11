@@ -49,8 +49,10 @@ const WheelPicker: React.FC<Props> = ({
   containerProps = {},
   flatListProps = {},
 }) => {
-  const flatListRef = useRef<FlatList>(null);
-  const [scrollY] = useState(new Animated.Value(0));
+  const flatListRef = useRef<FlatList<string | null>>(null);
+  const [scrollY] = useState(
+    () => new Animated.Value(selectedIndex * itemHeight),
+  );
 
   const containerHeight = (1 + visibleRest * 2) * itemHeight;
   const paddedOptions = useMemo(() => {
@@ -107,11 +109,16 @@ const WheelPicker: React.FC<Props> = ({
    * This ensures that what the user sees as selected in the picker always corresponds to the value state.
    */
   useEffect(() => {
-    flatListRef.current?.scrollToIndex({
-      index: selectedIndex,
+    const offset = selectedIndex * itemHeight;
+
+    // Also sync animated-state instantly
+    scrollY.setValue(offset);
+
+    flatListRef.current?.scrollToOffset({
+      offset,
       animated: false,
     });
-  }, [selectedIndex]);
+  }, [selectedIndex, itemHeight, scrollY]);
 
   return (
     <View
@@ -133,6 +140,7 @@ const WheelPicker: React.FC<Props> = ({
         ref={flatListRef}
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
+        contentOffset={{ x: 0, y: selectedIndex * itemHeight }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true },
